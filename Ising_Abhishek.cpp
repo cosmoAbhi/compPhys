@@ -11,9 +11,10 @@ using namespace std;
 //std::mt19937 generator (123);
 //std::uniform_real_distribution<double> dis(0.0, 1.0);
 double energy();
+double magnetisation();
 double chain[10][10];
 int v1, stepcount=0;
-double prev, current, compare, temp=2.5;
+double prev, current, compare, temp=2.0, coupl=1, h=-0.5;
 int main()
 {
     srand ( time(NULL) );
@@ -36,6 +37,7 @@ int main()
     }
     current=energy();
     cout<<"The present energy is "<<current<<" J."<<endl;
+    cout<<"The present magnetisation is "<<magnetisation()<<endl;
     for(int sweep=0;sweep<10000;sweep++)
         for(int i=0;i<10;i++)
             for(int j=0;j<10;j++)
@@ -63,6 +65,7 @@ int main()
         cout<<endl;
     }
     cout<<"The final energy is "<<current<<" J."<<endl;
+    cout<<"The final magnetisation is "<<magnetisation()<<endl;
 }
 double energy()
 {
@@ -70,9 +73,22 @@ double energy()
     for(int i=0;i<10;i++)
         for(int j=0;j<10;j++)
         {
+            en-=h*chain[i][j];
             if(i<9)
-                en-=chain[i][j]*chain[i+1][j];
+                en-=coupl*chain[i][j]*chain[i+1][j];
+            if(i==9)
+                en-=coupl*chain[i][j]*chain[0][j];
             if(j<9)
-                en-=chain[i][j]*chain[i][j+1];
+                en-=coupl*chain[i][j]*chain[i][j+1];
+            if(j==9)
+                en-=coupl*chain[i][j]*chain[i][0];
         }
+}
+double magnetisation()
+{
+    double sum=0;
+    for(int i=0;i<10;i++)
+        for(int j=0;j<10;j++)
+            sum+=chain[i][j];
+    return (sum/100);
 }
