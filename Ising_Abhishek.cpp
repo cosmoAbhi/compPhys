@@ -8,13 +8,13 @@
 #include <time.h>
 using namespace std;
 
-//std::mt19937 generator (123);
-//std::uniform_real_distribution<double> dis(0.0, 1.0);
 double energy();
 double magnetisation();
 double chain[10][10];
 int v1, stepcount=0;
 double prev, current, compare, temp=2.0, coupl=1, h=-0.5;
+//'temp' is the temperature of the bath, 'coupl' is the constant coefficient of (-J1.J2) in the Hamiltonian, h is the polarising magnetic field
+//The Boltzmann constant is taken to be unity.
 int main()
 {
     srand ( time(NULL) );
@@ -36,7 +36,7 @@ int main()
         cout<<endl;
     }
     current=energy();
-    cout<<"The present energy is "<<current<<" J."<<endl;
+    cout<<"The present energy is "<<current<<" units."<<endl;
     cout<<"The present magnetisation is "<<magnetisation()<<endl;
     for(int sweep=0;sweep<10000;sweep++)
         for(int i=0;i<10;i++)
@@ -64,7 +64,7 @@ int main()
         }
         cout<<endl;
     }
-    cout<<"The final energy is "<<current<<" J."<<endl;
+    cout<<"The final energy is "<<current<<" units."<<endl;
     cout<<"The final magnetisation is "<<magnetisation()<<endl;
 }
 double energy()
