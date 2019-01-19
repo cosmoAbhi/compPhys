@@ -10,16 +10,23 @@ using namespace std;
 
 double energy();
 double magnetisation();
-double chain[10][10];
+int dim=10;
+double chain [10][10];
+//NOTE that due to limitations in dynamic array allocations in C++, the array size in the declaration must be changed manually while changing 'dim'.
 int v1, stepcount=0;
-double prev, current, compare, temp=2.0, coupl=1, h=-0.5;
-//'temp' is the temperature of the bath, 'coupl' is the constant coefficient of (-J1.J2) in the Hamiltonian, h is the polarising magnetic field
-//The Boltzmann constant is taken to be unity.
+double prev, current, compare, dE, fin_energy=0, fin_mag=0, temp=0.5, coupl=1, h=0;
+int MC=1000;
+/*Adjustable parameters are:
+temp (temperature of the bath), 
+coupl (coupling coefficient of neighbouring spin interaction term in the Hamiltonian), 
+h (external magnetic field), 
+MC (no. of Monte Carlo steps), 
+dim (dimension of chain).*/
 int main()
 {
     srand ( time(NULL) );
-    for(int i=0;i<10;i++)
-        for(int j=0;j<10;j++)
+    for(int i=0;i<dim;i++)
+        for(int j=0;j<dim;j++)
         {
             v1=rand()%100;
             if(v1<50)
@@ -27,68 +34,93 @@ int main()
             else
                 chain[i][j]=1;
         }
-    for(int i=0;i<10;i++)
+    for(int i=0;i<dim;i++)
     {
-        for(int j=0;j<10;j++)
+        for(int j=0;j<dim;j++)
         {
             cout<<chain[i][j]<<" ";
         }
         cout<<endl;
     }
     current=energy();
-    cout<<"The present energy is "<<current<<" units."<<endl;
-    cout<<"The present magnetisation is "<<magnetisation()<<endl;
-    for(int sweep=0;sweep<10000;sweep++)
-        for(int i=0;i<10;i++)
-            for(int j=0;j<10;j++)
+    cout<<"The present energy per site is "<<current*temp/coupl/dim/dim<<"k_B."<<endl;
+    cout<<"The present magnetisation per site is "<<magnetisation()<<"."<<endl;
+    ofstream write;
+    write.open("output.txt");
+    for(int sweep=0;sweep<MC;sweep++)
+    {
+        for(int i=0;i<dim;i++)
+        {
+            for(int j=0;j<dim;j++)
             {
-                prev=current;
+                prev=energy();
                 chain[i][j]*=-1;
                 current=energy();
-                if(current>prev)
+                dE = current - prev;
+                chain[i][j] *= -1;
+                //cout << dE << endl;
+                if (dE <= 0)
+                {
+                    chain[i][j] *= -1;
+                    current = current + dE;
+                }
+                else if(dE > 0)
                 {
                     v1=rand()%100;
-                    compare=exp((prev-current)/temp);
-                    if(compare*100<v1)
+                    compare=exp(-(dE)/temp);
+                    if(compare*100>v1)
                     {
                         chain[i][j]*=-1;
-                        current=prev;
+                        current=current + dE;
                     }
                 }
             }
-    for(int i=0;i<10;i++)
+        }
+        if (sweep >= MC/2){
+        fin_energy+=current;
+        fin_mag+=magnetisation();
+        }
+        //cout<<endl;
+
+    //cout<<sweep<<"  "<<current<<"   "<<magnetisation()<<endl;
+        write<<sweep<<" "<<current<<"   "<<magnetisation()<<endl;
+    }
+    for(int i=0;i<dim;i++)
     {
-        for(int j=0;j<10;j++)
+        for(int j=0;j<dim;j++)
         {
             cout<<chain[i][j]<<" ";
         }
         cout<<endl;
     }
-    cout<<"The final energy is "<<current<<" units."<<endl;
-    cout<<"The final magnetisation is "<<magnetisation()<<endl;
+    fin_energy=fin_energy*2/MC;
+    fin_mag=fin_mag*2/MC;
+    cout<<"The final average energy per site over "<<(MC/2)<<" cycles is "<<fin_energy*temp/coupl/dim/dim<<"k_B."<<endl;
+    cout<<"The final average magnetisation per site over "<<(MC/2)<<" cycles is "<<magnetisation()<<"."<<endl;
 }
 double energy()
 {
     double en=0;
-    for(int i=0;i<10;i++)
-        for(int j=0;j<10;j++)
+    for(int i=0;i<dim;i++)
+        for(int j=0;j<dim;j++)
         {
             en-=h*chain[i][j];
-            if(i<9)
+            if(i<(dim-1))
                 en-=coupl*chain[i][j]*chain[i+1][j];
-            if(i==9)
+            if(i==(dim-1))
                 en-=coupl*chain[i][j]*chain[0][j];
-            if(j<9)
+            if(j<(dim-1))
                 en-=coupl*chain[i][j]*chain[i][j+1];
-            if(j==9)
+            if(j==(dim-1))
                 en-=coupl*chain[i][j]*chain[i][0];
         }
+        return (en);
 }
 double magnetisation()
 {
     double sum=0;
-    for(int i=0;i<10;i++)
-        for(int j=0;j<10;j++)
+    for(int i=0;i<dim;i++)
+        for(int j=0;j<dim;j++)
             sum+=chain[i][j];
-    return (sum/100);
+    return (sum/dim/dim);
 }
