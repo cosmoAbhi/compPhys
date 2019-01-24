@@ -43,7 +43,7 @@ int main()
         cout<<endl;
     }
     current=energy();
-    cout<<"The present energy per site is "<<current/dim/dim<<"J."<<endl;
+    cout<<"The present energy per site is "<<current/dim/dim<<endl;
     cout<<"The present magnetisation per site is "<<magnetisation()<<"."<<endl;
     ofstream write;
     write.open("output.txt");
@@ -95,7 +95,7 @@ int main()
     }
     fin_energy=fin_energy*2/MC;
     fin_mag=fin_mag*2/MC;
-    cout<<"The final average energy per site over "<<(MC/2)<<" cycles is "<<fin_energy*temp/coupl/dim/dim<<"k_B."<<endl;
+    cout<<"The final average energy per site over "<<(MC/2)<<" cycles is "<<fin_energy/dim/dim<<endl;
     cout<<"The final average magnetisation per site over "<<(MC/2)<<" cycles is "<<magnetisation()<<"."<<endl;
 }
 double energy()
