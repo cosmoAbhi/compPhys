@@ -43,7 +43,7 @@ int main()
         cout<<endl;
     }
     current=energy();
-    cout<<"The present energy per site is "<<current*temp/coupl/dim/dim<<"k_B."<<endl;
+    cout<<"The present energy per site is "<<current/dim/dim<<"J."<<endl;
     cout<<"The present magnetisation per site is "<<magnetisation()<<"."<<endl;
     ofstream write;
     write.open("output.txt");
